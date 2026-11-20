@@ -1,32 +1,38 @@
 using System;
 using System.Net.Http;
+using SimplePocketBase.Auth;
+using SimplePocketBase.Http;
+using SimplePocketBase.Records;
 
 namespace SimplePocketBase
 {
-    public class PocketBaseClient
+    public class PocketBaseClient : IDisposable
     {
         private HttpClient _httpClient;
-        public HttpClient HttpClient
-        {
-            get 
-            { 
-                return _httpClient; 
-            }
-        }
-
         public string BaseUrl { get; private set; }
+        public AuthService Auth { get; private set; }
+        public RecordService Records { get; private set; }
 
-        public PocketBaseClient(string baseUrl) : this(baseUrl, new HttpClient()) { }
-
-        public PocketBaseClient(string baseUrl, HttpClient httpClient)
+        public PocketBaseClient(string baseUrl)
         {
             if (string.IsNullOrWhiteSpace(baseUrl))
             {
                 throw new ArgumentException("PocketBase URL is required.", "baseUrl");
             }
-                
+
             BaseUrl = baseUrl.TrimEnd('/');
-            _httpClient = httpClient;
+            _httpClient = new HttpClient();
+
+            var authState = new AuthState();
+            var http = new PocketBaseHttpClient(BaseUrl, _httpClient, authState);
+
+            Auth = new AuthService(http, authState);
+            Records = new RecordService(http);
+        }
+
+        public void Dispose()
+        {
+            _httpClient.Dispose();
         }
     }
 }
