@@ -13,12 +13,19 @@ namespace SimplePocketBase.Http
         private HttpClient _httpClient;
         private AuthState _authState;
         private string _baseUrl;
+        private PocketBaseOptions _options;
 
-        public PocketBaseHttpClient(string baseUrl, HttpClient httpClient, AuthState authState)
+        public PocketBaseHttpClient(string baseUrl, HttpClient httpClient, AuthState authState, PocketBaseOptions options)
         {
             _baseUrl = baseUrl.TrimEnd('/');
             _httpClient = httpClient;
             _authState = authState;
+            _options = options ?? PocketBaseOptions.CreateDefault();
+        }
+
+        internal JsonSerializerSettings JsonSettings
+        {
+            get { return _options.JsonSettings; }
         }
 
         public async Task<T> SendAsync<T>(HttpMethod method, string path, object body, CancellationToken cancellationToken = default)
@@ -32,7 +39,7 @@ namespace SimplePocketBase.Http
 
                 if (body != null)
                 {
-                    var json = JsonConvert.SerializeObject(body);
+                    var json = JsonConvert.SerializeObject(body, _options.JsonSettings);
                     request.Content = new StringContent(json, Encoding.UTF8, "application/json");
                 }
 
@@ -50,7 +57,7 @@ namespace SimplePocketBase.Http
                         return default;
                     }
 
-                    return JsonConvert.DeserializeObject<T>(responseBody);
+                    return JsonConvert.DeserializeObject<T>(responseBody, _options.JsonSettings);
                 }
             }
         }

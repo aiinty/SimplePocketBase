@@ -4,6 +4,7 @@ using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
 using SimplePocketBase.Http;
+using Newtonsoft.Json;
 using Newtonsoft.Json.Linq;
 using System.Security.Cryptography;
 
@@ -61,7 +62,10 @@ namespace SimplePocketBase.Auth
                 throw new ArgumentNullException("data");
             }
 
-            var payload = JObject.FromObject(data);
+            var payload = JObject.FromObject(
+                data,
+                JsonSerializer.Create(_http.JsonSettings)
+            );
 
             var password = payload["password"]?.Value<string>();
             var passwordConfirm = payload["passwordConfirm"]?.Value<string>();

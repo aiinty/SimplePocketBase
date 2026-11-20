@@ -13,7 +13,9 @@ namespace SimplePocketBase
         public AuthService Auth { get; private set; }
         public RecordService Records { get; private set; }
 
-        public PocketBaseClient(string baseUrl)
+        public PocketBaseClient(string baseUrl) : this(baseUrl, null) { }
+
+        public PocketBaseClient(string baseUrl, PocketBaseOptions options)
         {
             if (string.IsNullOrWhiteSpace(baseUrl))
             {
@@ -24,7 +26,12 @@ namespace SimplePocketBase
             _httpClient = new HttpClient();
 
             var authState = new AuthState();
-            var http = new PocketBaseHttpClient(BaseUrl, _httpClient, authState);
+            var http = new PocketBaseHttpClient(
+                BaseUrl,
+                _httpClient,
+                authState,
+                options ?? PocketBaseOptions.CreateDefault()
+            );
 
             Auth = new AuthService(http, authState);
             Records = new RecordService(http);

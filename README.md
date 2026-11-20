@@ -47,7 +47,6 @@ public class Category
 
 ### Registration
 
-
 ```csharp
 var user = await client.Auth.RegisterAsync<User>(
     "users",
